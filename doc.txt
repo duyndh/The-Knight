@@ -1,0 +1,80 @@
+The Knight
+
+Gameplay:
+Người chơi nhập vai vào nhân vật Knight, có nhiệm vụ thoát khỏi mê cung.
+
+Tư tưởng chung:
+Xây dựng bản đồ là một ma trận 2 chiều kích thước (nRow + 2) * (nColumn + 2) (có thêm 4 bức tường bao quanh).
+Mỗi ô trong ma trận có tối đa 4 ô kể với nó. 
+Việc xác định 1 đỉnh có kề với 1 đỉnh bên cạnh hay không bằng cách biểu diễn dưới dạng 1 số nguyên 4 bit.
+Do đó sẽ có tất cả 16 trạng thái, [0.. 15] hay ['0000'..'1111']
+Bit 1 được xem là kề nhau, bit 0 là không kề nhau.
+Quy ước biểu diễn theo thứ tự URDL. Tức là xét từ phải qua, chuỗi 4 bit biểu diễn trạng thái kề nhau của ô đó với 4 ô UP, RIGHT, DOWN, LEFT.
+Các ô là tường xem như không kề với đỉnh nào, tương ứng với 0 hay '0000'.
+
+Thuật toán phát sinh ngẫu nhiên ma trận:
+Lưu trữ trạng thái kề của tất cả các ô trong ma trận bằng 1 mảng 2 chiều.
+Sử dụng tư tưởng vét cạn để phát sinh ngẫu nhiên từng ô trong ma trận, theo thứ tự từng hàng, từ trái sang phải.
+Để dễ dàng xử lý, ta chuyển tọa độ hàng-cột của từng ô về 1 số nguyên theo công thức index = row * (nColumn + 2) + column.
+Lưu ý trog quá trình sinh ngẫu nhiên, ta phải đảm bảo trạng thái kề nhau của các ô kề nhau phù hợp. 
+Ví dụ ô phía trên phải có bit DOWN trùng với bit UP của ô phía dưới. Tương tự với các chiều khác.
+Do thứ tự phát sinh ngẫu nhiên các ô, ta chỉ cần kiểm tra việc kề nhau của ô hiện tại với 2 chiều UP và LEFT.
+Đặc biệt các ô ở hàng nRow và cột nColumn, ta cần kiểm tra thêm 1 chiều DOWN (đối với hàng nRow) và chiều RIGHT (đối với cột Column).
+
+Để ma trận trong từ 1 ô luôn có đường đi tới mọi ô khác, ta cần đảm bảo tính chất liên thông.
+Xem mỗi ô tương ứng là 1 đỉnh của đồ thị, 2 đỉnh có đường nối 2 chiều nếu chúng kề nhau.
+Do trạng thái kề nhau đã được lưu trữ ở bước trên nên có thể dê dàng xây dựng đồ thị này.
+Để duyệt đồ thị và đánh dấu những đỉnh đã duyệt, ta sử dụng thuật toán duyệt chiều sâu (DFS) hoặc duyệt chiều rộng (BFS)
+
+Cải tiến:
+Do ta sử dụng tư tưởng vét cạn, đồng thời với mỗi bộ kết quả tìm được lại phải xây dựng lại 1 đồ thị 
+để kiểm tra tính liên thông nên thời gian để phát sinh ngẫu nhiên ma trận này khá lâu khi kích thước ma trận tăng lên.
+Để khắc phục, ta sẽ xây dựng việc kiểm tra tính liên thông trong quá trình vét cạn bằng tư tưởng tô màu đồ thị.
+Với mỗi ô vừa được sinh ngẫu nhiên, ta sẽ đồng bộ màu của nó với màu của các ô kề nó đã được xây dựng trước (cụ thể là xét 2 ô UP và LEFT nếu kề nhau).
+Mỗi màu được xem là 1 đỉnh trong đồ thị màu. Có 4 trường hợp xảy ra:
+- Không kề đỉnh nào trong 2 đỉnh kia: tạo 1 màu mới có chỉ số màu = chỉ số màu lớn nhất + 1.
+- Kề 1 đỉnh: tô màu đỉnh hiện tại là màu của đỉnh kề.
+- Kề 2 đỉnh cùng màu: tương tự kề 1 đỉnh.
+- Kề 2 đỉnh khác màu: tô màu đỉnh hiện tại bằng màu bất kỳ trong 2 màu. Và đồng bộ 2 màu đó lại (tạo đường nối 2 chiều giữa 2 màu).
+
+Với mỗi bộ kết quả tìm được, ta tiến hành kiểm tra xem tất cả các màu đã được đồng bộ chưa. 
+Lúc này ma trận màu đã được xây dựng, ta chỉ cần kiểm tra đồ thị màu này có liên thông hay không.
+Do ma trận màu có kích thước nhỏ hơn rất nhiều so với ma trận đỉnh đồng thời việc kiểm ra cũng rất đơn giản nên sẽ tiết kiệm được chi phí phát sinh ngẫu nhiên ma trận hợp lệ.
+
+XONG BƯỚC PHÁT SINH MA TRẬN !
+
+Tiếp theo ta sẽ chọn vị trí đặt nhân vật, cửa thoát hiểm, và các vật phẩm, quái vật trong ma trận này.
+Ta dùng thuật toán tìm đường đi ngắn nhất (Dijkstra / Bellman Ford) đề tìm đường đi ngắn nhất cho nhân vật thoát khỏi mê cung.
+Xem vị trí ban đầu của nhân vật là điểm xuất phát, còn cửa thoát hiểm là đích đến.
+2 đỉnh trong ma trận có trọng số, mặc định là 1 hoặc là x tùy trường hợp đỉnh tiếp theo là vật phẩm hay quái vật.
+
+
+private List<int> colorIndex;
+    private int[] colorNodes;
+int colorUp = 0;
+                int colorLeft = 0;
+
+                if (GetUp(kind) == 1)
+                    colorUp = colorNodes[ToIndex(ToRow(index) - 1, ToColumn(index))];
+
+                if (GetLeft(kind) == 1)
+                    colorLeft = colorNodes[ToIndex(ToRow(index), ToColumn(index) - 1)];
+
+                if (colorUp * colorLeft != 0)
+                {
+                    colorIndex[]
+                }
+                else if (colorUp != 0)
+                {
+                    colorNodes[index] = colorUp;
+                }
+                else if (colorLeft != 0)
+                {
+                    colorNodes[index] = colorLeft;
+                }
+                else
+                {
+                    colorNodes[index] = colorIndex.Count + 1;
+                    colorIndex.Add(colorIndex.Count + 1);
+                }
+                
