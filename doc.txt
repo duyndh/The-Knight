@@ -1,4 +1,4 @@
-The Knight
+﻿The Knight
 
 Gameplay:
 Người chơi nhập vai vào nhân vật Knight, có nhiệm vụ thoát khỏi mê cung.
@@ -44,7 +44,8 @@ Do ma trận màu có kích thước nhỏ hơn rất nhiều so với ma trận
 XONG BƯỚC PHÁT SINH MA TRẬN !
 
 Tiếp theo ta sẽ chọn vị trí đặt nhân vật, cửa thoát hiểm, và các vật phẩm, quái vật trong ma trận này.
-Ta dùng thuật toán tìm đường đi ngắn nhất (Dijkstra / Bellman Ford) đề tìm đường đi ngắn nhất cho nhân vật thoát khỏi mê cung.
 Xem vị trí ban đầu của nhân vật là điểm xuất phát, còn cửa thoát hiểm là đích đến.
 2 đỉnh trong ma trận có trọng số, mặc định là 1 hoặc là x tùy trường hợp đỉnh tiếp theo là vật phẩm hay quái vật.
-              
+Ta dùng thuật toán tìm đường đi ngắn nhất (Dijkstra / Floyd) để tìm đường đi ngắn nhất cho nhân vật thoát khỏi mê cung.
+Hiện ta chỉ thêm quái vật vào nên đồ thị được xem là không có trọng số âm -> thuật toán Dijkstra
+Ta cấp cho nhân vật lượng năng lượng bằng đúng chi phí đường đi ngắn nhất tìm được. Do đó người chơi phải tìm cách đi sao cho tôi ưu nhất để thoát khỏi mê cung.

@@ -58,7 +58,12 @@ public class MapSpawner : MonoBehaviour {
         playerPower -= x;
         playerPowerText.text = playerPower.ToString();
     }
-    
+
+    public int GetPlayerPower()
+    {
+        return playerPower;
+    }
+
     public float GetSpacing()
     {
         return spacing;
