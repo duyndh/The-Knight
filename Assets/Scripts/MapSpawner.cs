@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using UnityEngine.UI;
 
 public class MapSpawner : MonoBehaviour {
 
     public GameObject playerPrefabs;
     public GameObject exitDoorPrefabs;
 
+    public Text playerPowerText;
+    
     public GameObject[] tilePrefabs;
 
     public GameObject wall_U;
@@ -33,25 +36,42 @@ public class MapSpawner : MonoBehaviour {
     private int[] nodes; // decimal form, binary form like U-R-D-L (up - right - down -left) 
                          // 1: allowed, 0: not allowed
 
-    private int start, exit;
+    private int playerPower;
+
+    private int source, target;
     private int[] specialsPosition;
     private int[] specialsValue;
 
     private List<int>[] adjacencyList;
+    private int[,] adjacencyMatrix;
 
+    private int[] distance;
+    private int[] trace;
+
+    public int[,] GetAdjacencyMatrix()
+    {
+        return adjacencyMatrix;
+    }
+
+    public void DecreasePower(int x)
+    {
+        playerPower -= x;
+        playerPowerText.text = playerPower.ToString();
+    }
+    
     public float GetSpacing()
     {
         return spacing;
     }
 
-    public int GetPlayerStartPosition()
+    public int GetSource()
     {
-        return start;
+        return source;
     }
 
-    public int GetExitDoorPosition()
+    public int GetTarget()
     {
-        return exit;
+        return target;
     }
 
     public int[] GetNodes()
@@ -258,9 +278,9 @@ public class MapSpawner : MonoBehaviour {
 
         nodes = new int[(nRow + 2) * (nColumn + 2)];
         
-        start = ToIndex0(int.Parse(s[2]));
+        source = ToIndex0(int.Parse(s[2]));
         
-        exit = ToIndex0(int.Parse(s[3]));
+        target = ToIndex0(int.Parse(s[3]));
         
         int nSpecials = int.Parse(s[4]);
 
@@ -269,8 +289,8 @@ public class MapSpawner : MonoBehaviour {
 
         for (int i = 0; i < nSpecials; i++)
         {
-            specialsPosition[i] = int.Parse(s[5 + i * 2]);
-            specialsValue[i] = int.Parse(s[6 + i * 2]);
+            specialsPosition[i] = ToIndex0(int.Parse(s[5 + i * 2]));
+            specialsValue[i] = (-1) * int.Parse(s[6 + i * 2]);
         }
 
         int k = 5 + nSpecials * 2;
@@ -283,6 +303,7 @@ public class MapSpawner : MonoBehaviour {
         }
 
         sr.Close();
+
     }
 
     void GenerateMap(int _nRow, int _nColumn)
@@ -319,10 +340,10 @@ public class MapSpawner : MonoBehaviour {
         spacing = Mathf.Min(height / (nRow + 2), width / (nColumn + 2));
 
         // Show player
-        GameObject player = SpawnTile(playerPrefabs, ToRow0(start) + 1, ToColumn0(start) + 1, Vector3.back);
+        GameObject player = SpawnTile(playerPrefabs, ToRow0(source) + 1, ToColumn0(source) + 1, Vector3.back);
         
         // Show exit door
-        GameObject exitDoor = SpawnTile(exitDoorPrefabs, ToRow0(exit) + 1, ToColumn0(exit) + 1, 0.5f * Vector3.back);
+        GameObject exitDoor = SpawnTile(exitDoorPrefabs, ToRow0(target) + 1, ToColumn0(target) + 1, 0.5f * Vector3.back);
         
 
 
@@ -380,7 +401,21 @@ public class MapSpawner : MonoBehaviour {
 
     void BuildGraph()
     {
+        adjacencyMatrix = new int[nRow * nColumn, nRow * nColumn];
+        // init
+        for (int i = 0; i < nRow * nColumn; i++)
+        {
+            for (int j = 0; j < nRow * nColumn; j++)
+            {
+                if (i == j)
+                    adjacencyMatrix[i, j] = 0;
+                else
+                    adjacencyMatrix[i, j] = int.MaxValue;
+            }
+        }
+
         adjacencyList = new List<int> [nRow * nColumn];
+        
         for (int i = 0; i < nRow * nColumn; i++)
         {
             adjacencyList[i] = new List<int>();
@@ -388,27 +423,100 @@ public class MapSpawner : MonoBehaviour {
 
             if (ToRow0(i) > 0 && GetUp(nodes[ToIndex(i)]) == 1)
             {
-                adjacencyList[i].Add(ToIndex0(ToRow0(i) - 1, ToColumn0(i)));
+                int up = ToIndex0(ToRow0(i) - 1, ToColumn0(i));
+                adjacencyList[i].Add(up);
+                adjacencyMatrix[i, up] = 1;
                 //Debug.Log("U");
             }
 
             if (ToRow0(i) < nRow - 1 && GetDown(nodes[ToIndex(i)]) == 1)
             {
-                adjacencyList[i].Add(ToIndex0(ToRow0(i) + 1, ToColumn0(i)));
+                int down = ToIndex0(ToRow0(i) + 1, ToColumn0(i));
+        
+                adjacencyList[i].Add(down);
+                adjacencyMatrix[i, down] = 1;
                 //Debug.Log("D");
             }
 
             if (ToColumn0(i) > 0 && GetLeft(nodes[ToIndex(i)]) == 1)
             {
-                adjacencyList[i].Add(ToIndex0(ToRow0(i), ToColumn0(i) - 1));
+                int left = ToIndex0(ToRow0(i), ToColumn0(i) - 1);
+                adjacencyList[i].Add(left);
+                adjacencyMatrix[i, left] = 1;
                 //Debug.Log("L");
             }
 
             if (ToColumn0(i) < nColumn - 1 && GetRight(nodes[ToIndex(i)]) == 1)
             {
-                adjacencyList[i].Add(ToIndex0(ToRow0(i), ToColumn0(i) + 1));
+                int right = ToIndex0(ToRow0(i), ToColumn0(i) + 1);
+                adjacencyList[i].Add(right);
+                adjacencyMatrix[i, right] = 1;
                 //Debug.Log("R");
             }
+        }
+
+        for (int i = 0; i < specialsPosition.Length; i++)
+        {
+            int u = specialsPosition[i];
+            foreach (int v in adjacencyList[u])
+            {
+                adjacencyMatrix[v, u] = specialsValue[i];
+            }
+        }
+
+        //for (int i = 0; i < nRow * nColumn; i++)
+        //{
+        //    foreach (int x in adjacencyList[i])
+        //    {
+        //        Debug.Log(i + " " + x + " " + adjacencyMatrix[i, x]);
+        //    }
+        //}
+
+    }
+
+    // Dijkstra Algorithm
+    void FindShortestPath()
+    {
+        int numberNodes = nRow * nColumn;
+
+        bool[] free = new bool[numberNodes];
+
+        distance = new int[numberNodes];
+        trace = new int[numberNodes];
+
+        // init
+        for (int i = 0; i < numberNodes; i++)
+        {
+            distance[i] = int.MaxValue;
+            free[i] = true;
+        }
+        distance[source] = 0;
+
+        while (true)
+        {
+            // find node u in free nodes which has minimum distance
+            int u = 0;
+            int dmin = int.MaxValue;
+            for (int i = 0; i < numberNodes; i++)
+                if (free[i] && distance[i] < dmin)
+                {
+                    dmin = distance[i];
+                    u = i;
+                }
+
+            // found shortest path from source to targer -> break
+            if (u == target)
+                break;
+
+            free[u] = false;
+
+            // use node u to optimize nodes v which neighbour with u
+            foreach (int v in adjacencyList[u])
+                if (free[v] && distance[u] + adjacencyMatrix[u, v] < distance[v])
+                {
+                    distance[v] = distance[u] + adjacencyMatrix[u, v];
+                    trace[v] = u;
+                }
         }
     }
 
@@ -421,12 +529,17 @@ public class MapSpawner : MonoBehaviour {
 
         BuildGraph();
 
+        FindShortestPath();
+
+        playerPower = distance[target];
+        playerPowerText.text = playerPower.ToString();
+        
         ShowMap();
 
     }
 
     // Update is called once per frame
     void Update () {
-		
-	}
+        
+    }
 }

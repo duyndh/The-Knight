@@ -23,7 +23,7 @@ GameObject:
   - component: {fileID: 114116867663055856}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -52,6 +52,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 417e5291efea27b46b3fb51881d15251, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  powerText: {fileID: 0}
 --- !u!212 &212744100798627634
 SpriteRenderer:
   m_ObjectHideFlags: 1
