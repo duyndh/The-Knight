@@ -5,8 +5,8 @@ using System.IO;
 
 public class MapSpawner : MonoBehaviour {
 
-    private int nRow;
-    private int nColumn;
+    public GameObject playerPrefabs;
+    public GameObject exitDoorPrefabs;
 
     public GameObject[] tilePrefabs;
 
@@ -21,6 +21,9 @@ public class MapSpawner : MonoBehaviour {
     public GameObject wall_UL;
 
 
+    private int nRow;
+    private int nColumn;
+
     private float spacing;
 
     private GameObject[,] map;
@@ -30,78 +33,108 @@ public class MapSpawner : MonoBehaviour {
     private int[] nodes; // decimal form, binary form like U-R-D-L (up - right - down -left) 
                          // 1: allowed, 0: not allowed
 
-    
-    int ToIndex(int row, int column)
+    private int start, exit;
+    private int[] specialsPosition;
+    private int[] specialsValue;
+
+    private List<int>[] adjacencyList;
+
+    public float GetSpacing()
+    {
+        return spacing;
+    }
+
+    public int GetPlayerStartPosition()
+    {
+        return start;
+    }
+
+    public int GetExitDoorPosition()
+    {
+        return exit;
+    }
+
+    public int[] GetNodes()
+    {
+        return nodes;
+    }
+
+    public int ToIndex(int row, int column)
     {
         return row * (nColumn + 2) + column;
     }
 
-    int ToRow(int index)
+    public int ToIndex(int index)
+    {
+        return ToIndex(ToRow0(index) + 1, ToColumn0(index) + 1);
+    }
+
+    public int ToRow(int index)
     {
         return index / (nColumn + 2);
     }
 
-    int ToColumn(int index)
+    public int ToColumn(int index)
     {
         return index % (nColumn + 2);
     }
 
-    int GetUp(int k)
+    public int GetUp(int k)
     {
         return (k >> 3) & 1;
     }
 
-    int GetDown(int k)
+    public int GetDown(int k)
     {
         return (k >> 1) & 1;
     }
 
-    int GetLeft(int k)
+    public int GetLeft(int k)
     {
         return k & 1;
     }
 
-    int GetRight(int k)
+    public int GetRight(int k)
     {
         return (k >> 2) & 1;
     }
 
-    bool CheckTileUp(int kind, int index)
+    public bool CheckTileUp(int kind, int index)
     {
         int up = nodes[index - (nColumn + 2)];
         return (GetDown(up) == GetUp(kind)); 
     }
 
-    bool CheckTileDown(int kind, int index)
+    public bool CheckTileDown(int kind, int index)
     {
         int down = nodes[index + (nColumn + 2)];
         return (GetUp(down) == GetDown(kind));
     }
 
-    bool CheckTileLeft(int kind, int index)
+    public bool CheckTileLeft(int kind, int index)
     {
         int left = nodes[index - 1];
         return (GetRight(left) == GetLeft(kind));
     }
 
-    bool CheckTileRight(int kind, int index)
+    public bool CheckTileRight(int kind, int index)
     {
         int right = nodes[index + 1];
         return (GetLeft(right) == GetRight(kind));
     }
 
 
-    Vector3 Coordinate(int row, int column)
+    public Vector3 Coordinate(int row, int column, Vector3 delta)
     {
-        return new Vector3(column, -row, 0)
+        return delta + new Vector3(column, -row, 0)
                    - 0.5f * new Vector3((nColumn + 1) / 2 + (nColumn / 2 + 1),
                         -(nRow + 1) / 2 - (nColumn / 2 + 1), 0);
     }
 
-    GameObject SpawnTile(GameObject prefab, int row, int column)
+    GameObject SpawnTile(GameObject prefab, int row, int column, Vector3 delta)
     {
         GameObject tile = (GameObject)Instantiate(prefab,
-                    transform.position + spacing * Coordinate(row, column), prefab.transform.rotation);
+                    transform.position + spacing * Coordinate(row, column, delta), prefab.transform.rotation);
         tile.transform.localScale = spacing * 6.25f * Vector3.one;
         return tile;
     }
@@ -224,14 +257,35 @@ public class MapSpawner : MonoBehaviour {
         nColumn = int.Parse(s[1]);
 
         nodes = new int[(nRow + 2) * (nColumn + 2)];
+        
+        start = ToIndex0(int.Parse(s[2]));
+        
+        exit = ToIndex0(int.Parse(s[3]));
+        
+        int nSpecials = int.Parse(s[4]);
 
-        for (int i = 0; i < (nRow + 2) * (nColumn + 2); i++)
-            nodes[i] = int.Parse(s[i + 2]);
+        specialsPosition = new int[nSpecials];
+        specialsValue = new int[nSpecials];
+
+        for (int i = 0; i < nSpecials; i++)
+        {
+            specialsPosition[i] = int.Parse(s[5 + i * 2]);
+            specialsValue[i] = int.Parse(s[6 + i * 2]);
+        }
+
+        int k = 5 + nSpecials * 2;
+        for (int row = 1; row <= nRow; row++)
+        {
+            for (int column = 1; column <= nColumn; column++)
+            {
+                nodes[ToIndex(row, column)] = int.Parse(s[k++]);
+            }
+        }
 
         sr.Close();
     }
 
-    void GenerateGraph(int _nRow, int _nColumn)
+    void GenerateMap(int _nRow, int _nColumn)
     {
         nRow = _nRow;
         nColumn = _nColumn;
@@ -264,6 +318,14 @@ public class MapSpawner : MonoBehaviour {
         float width = height * Screen.width / Screen.height;
         spacing = Mathf.Min(height / (nRow + 2), width / (nColumn + 2));
 
+        // Show player
+        GameObject player = SpawnTile(playerPrefabs, ToRow0(start) + 1, ToColumn0(start) + 1, Vector3.back);
+        
+        // Show exit door
+        GameObject exitDoor = SpawnTile(exitDoorPrefabs, ToRow0(exit) + 1, ToColumn0(exit) + 1, 0.5f * Vector3.back);
+        
+
+
         map = new GameObject[nRow + 2, nColumn + 2];
 
         // Maze Tiles
@@ -271,39 +333,96 @@ public class MapSpawner : MonoBehaviour {
         {
             for (int column = 1; column <= nColumn; column++)
             {
-                map[row, column] = SpawnTile(tilePrefabs[nodes[ToIndex(row, column)]], row, column);
+                map[row, column] = SpawnTile(tilePrefabs[nodes[ToIndex(row, column)]], row, column, Vector3.zero);
             }
         }
 
         // LEFT and RIGHT walls
         for (int row = 1; row < nRow + 1; row++)
         {
-            map[row, 0] = SpawnTile(wall_L, row, 0);
-            map[row, nColumn + 1] = SpawnTile(wall_R, row, nColumn + 1);
+            map[row, 0] = SpawnTile(wall_L, row, 0, Vector3.zero);
+            map[row, nColumn + 1] = SpawnTile(wall_R, row, nColumn + 1, Vector3.zero);
         }
 
         // UP and DOWN walls
         for (int column = 1; column < nColumn + 1; column++)
         {
-            map[0, column] = SpawnTile(wall_U, 0, column);
-            map[nRow + 1, column] = SpawnTile(wall_D, nRow + 1, column);
+            map[0, column] = SpawnTile(wall_U, 0, column, Vector3.zero);
+            map[nRow + 1, column] = SpawnTile(wall_D, nRow + 1, column, Vector3.zero);
         }
 
         // corner wall
-        map[0, 0] = SpawnTile(wall_UL, 0, 0);
-        map[0, nColumn + 1] = SpawnTile(wall_UR, 0, nColumn + 1);
-        map[nRow + 1, 0] = SpawnTile(wall_DL, nRow + 1, 0);
-        map[nRow + 1, nColumn + 1] = SpawnTile(wall_DR, nRow + 1, nColumn + 1);
+        map[0, 0] = SpawnTile(wall_UL, 0, 0, Vector3.zero);
+        map[0, nColumn + 1] = SpawnTile(wall_UR, 0, nColumn + 1, Vector3.zero);
+        map[nRow + 1, 0] = SpawnTile(wall_DL, nRow + 1, 0, Vector3.zero);
+        map[nRow + 1, nColumn + 1] = SpawnTile(wall_DR, nRow + 1, nColumn + 1, Vector3.zero);
+    }
+
+    public int ToIndex0(int row, int column)
+    {
+        return row * nColumn + column;
+    }
+
+    public int ToIndex0(int index)
+    {
+        return ToIndex0(ToRow(index) - 1, ToColumn(index) - 1);
+    }
+
+    public int ToRow0(int index)
+    {
+        return index / nColumn;
+    }
+
+    public int ToColumn0(int index)
+    {
+        return index % nColumn;
+    }
+
+    void BuildGraph()
+    {
+        adjacencyList = new List<int> [nRow * nColumn];
+        for (int i = 0; i < nRow * nColumn; i++)
+        {
+            adjacencyList[i] = new List<int>();
+            //Debug.Log(i);
+
+            if (ToRow0(i) > 0 && GetUp(nodes[ToIndex(i)]) == 1)
+            {
+                adjacencyList[i].Add(ToIndex0(ToRow0(i) - 1, ToColumn0(i)));
+                //Debug.Log("U");
+            }
+
+            if (ToRow0(i) < nRow - 1 && GetDown(nodes[ToIndex(i)]) == 1)
+            {
+                adjacencyList[i].Add(ToIndex0(ToRow0(i) + 1, ToColumn0(i)));
+                //Debug.Log("D");
+            }
+
+            if (ToColumn0(i) > 0 && GetLeft(nodes[ToIndex(i)]) == 1)
+            {
+                adjacencyList[i].Add(ToIndex0(ToRow0(i), ToColumn0(i) - 1));
+                //Debug.Log("L");
+            }
+
+            if (ToColumn0(i) < nColumn - 1 && GetRight(nodes[ToIndex(i)]) == 1)
+            {
+                adjacencyList[i].Add(ToIndex0(ToRow0(i), ToColumn0(i) + 1));
+                //Debug.Log("R");
+            }
+        }
     }
 
     // Use this for initialization
 	void Start () {
 
-        LoadMap("map", 10);
-        
-        //GenerateGraph(12, 12);
+        LoadMap("map", 3);
 
-        ShowMap();        
+        //GenerateMap(12, 12);
+
+        BuildGraph();
+
+        ShowMap();
+
     }
 
     // Update is called once per frame

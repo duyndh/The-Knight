@@ -148,8 +148,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b1ed89ee990157b41bc3f62fb00ca8dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nRow: 5
-  nColumn: 5
+  playerPrefabs: {fileID: 1853154529200852, guid: 3cd6ce7465df81b4faf354fdec728884,
+    type: 2}
+  exitDoorPrefabs: {fileID: 1917399702063104, guid: 401a0d8f6dba32d46a6c012637c0bfc2,
+    type: 2}
   tilePrefabs:
   - {fileID: 0}
   - {fileID: 1754011547997166, guid: 8aeacde9d8b2e044e84e00257a0eabc0, type: 2}
