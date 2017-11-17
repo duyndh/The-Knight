@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.IO;
 
 public class MapSpawner : MonoBehaviour {
 
-    public int nRow;
-    public int nColumn;
+    private int nRow;
+    private int nColumn;
 
     public GameObject[] tilePrefabs;
 
@@ -21,6 +22,7 @@ public class MapSpawner : MonoBehaviour {
 
 
     private float spacing;
+
     private GameObject[,] map;
 
     private int[] allowedKinds = new int[] { 3, 5, 6, 7, 9, 10, 11, 12, 13, 14 };
@@ -107,8 +109,7 @@ public class MapSpawner : MonoBehaviour {
     void DepthFirstSearch(int i, ref bool[] free)
     {
         free[i] = false;
-        //Debug.Log(i);
-
+        
         int up = ToIndex(ToRow(i) - 1, ToColumn(i));
         if ((GetUp(nodes[i]) == 1) && free[up])
             DepthFirstSearch(up, ref free);
@@ -167,12 +168,11 @@ public class MapSpawner : MonoBehaviour {
         }
     }
 
+
     void BackTracking(int index, ref bool valid)
     {
-        //Debug.Log(index);
         if (index > ToIndex(nRow, nColumn))
         {
-            //Debug.Log("OK");
             valid = CheckInterConnectedGraph();
         }
         else
@@ -188,10 +188,9 @@ public class MapSpawner : MonoBehaviour {
                     continue;
                 if (ToRow(index) == nRow && !CheckTileDown(kind, index))
                     continue;
-
-
+                
                 nodes[index] = kind;
-
+                
                 if (ToColumn(index) == nColumn)
                     BackTracking(index + 3, ref valid);
                 else
@@ -202,12 +201,44 @@ public class MapSpawner : MonoBehaviour {
             }
         }
     }
-
-    void GenerateGraph()
+    void SaveMap(string fileName)
     {
-        // add 2 row and 2 column of wall
+        StreamWriter sw = File.CreateText(fileName);
+        sw.Write(nRow + " " + nColumn + " ");
+        for (int i = 0; i < nodes.Length; i++)
+            sw.Write(nodes[i] + " ");
+        sw.WriteLine();
+        sw.Close();
+    }
+
+    void LoadMap(string fileName, int level)
+    {
+        StreamReader sr = File.OpenText(fileName);
+        string t = "";
+        for (int i = 0; i < level; i++)
+            t = sr.ReadLine();
+
+        string[] s = t.Split(' ');
+
+        nRow = int.Parse(s[0]);
+        nColumn = int.Parse(s[1]);
+
         nodes = new int[(nRow + 2) * (nColumn + 2)];
 
+        for (int i = 0; i < (nRow + 2) * (nColumn + 2); i++)
+            nodes[i] = int.Parse(s[i + 2]);
+
+        sr.Close();
+    }
+
+    void GenerateGraph(int _nRow, int _nColumn)
+    {
+        nRow = _nRow;
+        nColumn = _nColumn;
+        
+        // add 2 rows and 2 columns of wall
+        nodes = new int[(nRow + 2) * (nColumn + 2)];
+        
         // init node kind of walls is 0 (not allowed move to)
         for (int row = 0; row <= nRow + 1; row++)
         {
@@ -223,13 +254,12 @@ public class MapSpawner : MonoBehaviour {
         bool valid = false;
 
         BackTracking(ToIndex(1, 1), ref valid);
+
+        SaveMap("_map");
     }
 
-    // Use this for initialization
-	void Start () {
-        
-        GenerateGraph();
-
+    void ShowMap()
+    {
         float height = Camera.main.orthographicSize * 2f;
         float width = height * Screen.width / Screen.height;
         spacing = Mathf.Min(height / (nRow + 2), width / (nColumn + 2));
@@ -259,17 +289,21 @@ public class MapSpawner : MonoBehaviour {
             map[nRow + 1, column] = SpawnTile(wall_D, nRow + 1, column);
         }
 
-        // UP-LEFT corner
+        // corner wall
         map[0, 0] = SpawnTile(wall_UL, 0, 0);
-        
-        // UP-RIGHT corner 
         map[0, nColumn + 1] = SpawnTile(wall_UR, 0, nColumn + 1);
-
-        // DOWN-LEFT corner
         map[nRow + 1, 0] = SpawnTile(wall_DL, nRow + 1, 0);
-
-        //DOWN - RIGHT corner
         map[nRow + 1, nColumn + 1] = SpawnTile(wall_DR, nRow + 1, nColumn + 1);
+    }
+
+    // Use this for initialization
+	void Start () {
+
+        LoadMap("map", 10);
+        
+        //GenerateGraph(12, 12);
+
+        ShowMap();        
     }
 
     // Update is called once per frame
