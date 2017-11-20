@@ -26,7 +26,7 @@ Xem mỗi ô tương ứng là 1 đỉnh của đồ thị, 2 đỉnh có đư�
 Do trạng thái kề nhau đã được lưu trữ ở bước trên nên có thể dê dàng xây dựng đồ thị này.
 Để duyệt đồ thị và đánh dấu những đỉnh đã duyệt, ta sử dụng thuật toán duyệt chiều sâu (DFS) hoặc duyệt chiều rộng (BFS)
 
-Cải tiến [Đang xây dựng]:
+Cải tiến:
 Do ta sử dụng tư tưởng vét cạn, đồng thời với mỗi bộ kết quả tìm được lại phải xây dựng lại 1 đồ thị 
 để kiểm tra tính liên thông nên thời gian để phát sinh ngẫu nhiên ma trận này khá lâu khi kích thước ma trận tăng lên.
 Để khắc phục, ta sẽ xây dựng việc kiểm tra tính liên thông trong quá trình vét cạn bằng tư tưởng tô màu đồ thị.
@@ -43,9 +43,13 @@ Do ma trận màu có kích thước nhỏ hơn rất nhiều so với ma trận
 
 XONG BƯỚC PHÁT SINH MA TRẬN !
 
-Tiếp theo ta sẽ chọn vị trí đặt nhân vật, cửa thoát hiểm, và các vật phẩm, quái vật trong ma trận này.
+Tiếp theo ta sẽ chọn vị trí đặt nhân vật, cửa thoát hiểm (và các vật phẩm, quái vật) trong ma trận này.
+Tính năng các vật phẩm và quái vật đang được xây dựng, sẽ cố gắng hoàn thành trong thời gian sắp tới
 Xem vị trí ban đầu của nhân vật là điểm xuất phát, còn cửa thoát hiểm là đích đến.
 2 đỉnh trong ma trận có trọng số, mặc định là 1 hoặc là x tùy trường hợp đỉnh tiếp theo là vật phẩm hay quái vật.
 Ta dùng thuật toán tìm đường đi ngắn nhất (Dijkstra / Floyd) để tìm đường đi ngắn nhất cho nhân vật thoát khỏi mê cung.
-Hiện ta chỉ thêm quái vật vào nên đồ thị được xem là không có trọng số âm -> thuật toán Dijkstra
+Do hiện tại game chưa có vật phẩm và quái vật nên đồ thị được xem là không có trọng số âm -> thuật toán Dijkstra
 Ta cấp cho nhân vật lượng năng lượng bằng đúng chi phí đường đi ngắn nhất tìm được. Do đó người chơi phải tìm cách đi sao cho tôi ưu nhất để thoát khỏi mê cung.
+
+Việc phát sinh ma trận và tìm đường đi ngắn nhất được thực hiện trong quá trình phát triển game, mỗi ma trận được xem là 1 màn chơi và được lưu vào file map theo cấu trúc được quy định sẵn. 
+Bản release hiện tại chứa 10 màn chơi mẫu và chỉ cho phép đọc file này để lấy ra ma trận, tọa độ người chơi, cửa thoát hiểm và độ dài đường đi ngắn nhất. Sắp tới sẽ phát triển tính năng cho người dùng tự tạo màn chơi và thách đấu nhau.

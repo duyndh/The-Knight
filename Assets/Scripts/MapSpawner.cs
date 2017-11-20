@@ -4,13 +4,17 @@ using UnityEngine;
 using System.IO;
 using UnityEngine.UI;
 
-public class MapSpawner : MonoBehaviour {
 
+public class MapSpawner : MonoBehaviour
+{
     public GameObject playerPrefabs;
     public GameObject exitDoorPrefabs;
 
     public Text playerPowerText;
-    
+    public Text gameResultText;
+    public Button restartButton;
+    public Button menuButton;
+
     public GameObject[] tilePrefabs;
 
     public GameObject wall_U;
@@ -27,6 +31,8 @@ public class MapSpawner : MonoBehaviour {
     private int nRow;
     private int nColumn;
 
+    private GameObject player;
+
     private float spacing;
 
     private GameObject[,] map;
@@ -39,8 +45,8 @@ public class MapSpawner : MonoBehaviour {
     private int playerPower;
 
     private int source, target;
-    private int[] specialsPosition;
-    private int[] specialsValue;
+    //private int[] specialsPosition;
+    //private int[] specialsValue;
 
     private List<int>[] adjacencyList;
     private int[,] adjacencyMatrix;
@@ -127,7 +133,7 @@ public class MapSpawner : MonoBehaviour {
     public bool CheckTileUp(int kind, int index)
     {
         int up = nodes[index - (nColumn + 2)];
-        return (GetDown(up) == GetUp(kind)); 
+        return (GetDown(up) == GetUp(kind));
     }
 
     public bool CheckTileDown(int kind, int index)
@@ -167,7 +173,7 @@ public class MapSpawner : MonoBehaviour {
     void DepthFirstSearch(int i, ref bool[] free)
     {
         free[i] = false;
-        
+
         int up = ToIndex(ToRow(i) - 1, ToColumn(i));
         if ((GetUp(nodes[i]) == 1) && free[up])
             DepthFirstSearch(up, ref free);
@@ -190,7 +196,7 @@ public class MapSpawner : MonoBehaviour {
     bool CheckInterConnectedGraph()
     {
         bool[] free = new bool[(nRow + 2) * (nColumn + 2)];
-        
+
         // init all node is free, except walls
         for (int row = 0; row <= nRow + 1; row++)
             for (int column = 0; column <= nColumn + 1; column++)
@@ -199,10 +205,10 @@ public class MapSpawner : MonoBehaviour {
                 if (row == 0 || row == nRow + 1 || column == 0 || column == nColumn + 1)
                     free[ToIndex(row, column)] = false;
                 else
-                // tiles 
+                    // tiles 
                     free[ToIndex(row, column)] = true;
             }
-        
+
         DepthFirstSearch(ToIndex(1, 1), ref free);
 
         for (int i = 0; i < free.Length; i++)
@@ -218,7 +224,7 @@ public class MapSpawner : MonoBehaviour {
         for (int i = 0; i < length; i++)
         {
             int j = Random.Range(0, length);
-            
+
             // swap
             int t = array[i];
             array[i] = array[j];
@@ -246,9 +252,9 @@ public class MapSpawner : MonoBehaviour {
                     continue;
                 if (ToRow(index) == nRow && !CheckTileDown(kind, index))
                     continue;
-                
+
                 nodes[index] = kind;
-                
+
                 if (ToColumn(index) == nColumn)
                     BackTracking(index + 3, ref valid);
                 else
@@ -263,14 +269,27 @@ public class MapSpawner : MonoBehaviour {
     {
         StreamWriter sw = File.CreateText(fileName);
         sw.Write(nRow + " " + nColumn + " ");
-        for (int i = 0; i < nodes.Length; i++)
-            sw.Write(nodes[i] + " ");
+
+        sw.Write(distance[target]);
+
+        sw.Write(ToIndex(nRow / 2, nColumn / 2) + " " + ToIndex(nRow, nColumn) + " ");
+
+        //for (int i = 0; i < (int)Mathf.Sqrt(nodes.Length); i++)
+        //    sw.Write(Random.Range(1, ToIndex(nRow, nColumn) + 1) + " " + Random.Range(-(int)Mathf.Sqrt(nodes.Length), -1));
+
+        for (int row = 0; row < nRow; row++)
+            for (int column = 0; column < nColumn; column++)
+                sw.Write(nodes[ToIndex(ToIndex0(row, column))] + " ");
+
+        //for (int i = 0; i < nodes.Length; i++)
+        //    sw.Write(nodes[i] + " ");
         sw.WriteLine();
         sw.Close();
     }
 
     void LoadMap(string fileName, int level)
     {
+        //Debug.Log(level);
         StreamReader sr = File.OpenText(fileName);
         string t = "";
         for (int i = 0; i < level; i++)
@@ -281,24 +300,28 @@ public class MapSpawner : MonoBehaviour {
         nRow = int.Parse(s[0]);
         nColumn = int.Parse(s[1]);
 
+        playerPower = int.Parse(s[2]);
+        
         nodes = new int[(nRow + 2) * (nColumn + 2)];
-        
-        source = ToIndex0(int.Parse(s[2]));
-        
-        target = ToIndex0(int.Parse(s[3]));
-        
-        int nSpecials = int.Parse(s[4]);
 
-        specialsPosition = new int[nSpecials];
-        specialsValue = new int[nSpecials];
+        source = ToIndex0(int.Parse(s[3]));
 
-        for (int i = 0; i < nSpecials; i++)
-        {
-            specialsPosition[i] = ToIndex0(int.Parse(s[5 + i * 2]));
-            specialsValue[i] = (-1) * int.Parse(s[6 + i * 2]);
-        }
+        target = ToIndex0(int.Parse(s[4]));
 
-        int k = 5 + nSpecials * 2;
+        //int nSpecials = 0;// int.Parse(s[4]);
+        //specialsPosition = new int[0];
+        //specialsValue = new int[0];
+
+        //specialsPosition = new int[nSpecials];
+        //specialsValue = new int[nSpecials];
+
+        //for (int i = 0; i < nSpecials; i++)
+        //{
+        //    specialsPosition[i] = ToIndex0(int.Parse(s[5 + i * 2]));
+        //    specialsValue[i] = (-1) * int.Parse(s[6 + i * 2]);
+        //}
+
+        int k = 5;// + nSpecials * 2;
         for (int row = 1; row <= nRow; row++)
         {
             for (int column = 1; column <= nColumn; column++)
@@ -306,6 +329,9 @@ public class MapSpawner : MonoBehaviour {
                 nodes[ToIndex(row, column)] = int.Parse(s[k++]);
             }
         }
+
+        //for (int i = 0; i < nodes.Length; i++)
+        //    Debug.Log(nodes[i]);
 
         sr.Close();
 
@@ -315,10 +341,10 @@ public class MapSpawner : MonoBehaviour {
     {
         nRow = _nRow;
         nColumn = _nColumn;
-        
+
         // add 2 rows and 2 columns of wall
         nodes = new int[(nRow + 2) * (nColumn + 2)];
-        
+
         // init node kind of walls is 0 (not allowed move to)
         for (int row = 0; row <= nRow + 1; row++)
         {
@@ -345,12 +371,14 @@ public class MapSpawner : MonoBehaviour {
         spacing = Mathf.Min(height / (nRow + 2), width / (nColumn + 2));
 
         // Show player
-        GameObject player = SpawnTile(playerPrefabs, ToRow0(source) + 1, ToColumn0(source) + 1, Vector3.back);
-        
+        if (player)
+            Destroy(player);
+
+        player = SpawnTile(playerPrefabs, ToRow0(source) + 1, ToColumn0(source) + 1, Vector3.back);
+
+
         // Show exit door
         GameObject exitDoor = SpawnTile(exitDoorPrefabs, ToRow0(target) + 1, ToColumn0(target) + 1, 0.5f * Vector3.back);
-        
-
 
         map = new GameObject[nRow + 2, nColumn + 2];
 
@@ -419,8 +447,8 @@ public class MapSpawner : MonoBehaviour {
             }
         }
 
-        adjacencyList = new List<int> [nRow * nColumn];
-        
+        adjacencyList = new List<int>[nRow * nColumn];
+
         for (int i = 0; i < nRow * nColumn; i++)
         {
             adjacencyList[i] = new List<int>();
@@ -437,7 +465,7 @@ public class MapSpawner : MonoBehaviour {
             if (ToRow0(i) < nRow - 1 && GetDown(nodes[ToIndex(i)]) == 1)
             {
                 int down = ToIndex0(ToRow0(i) + 1, ToColumn0(i));
-        
+
                 adjacencyList[i].Add(down);
                 adjacencyMatrix[i, down] = 1;
                 //Debug.Log("D");
@@ -460,14 +488,14 @@ public class MapSpawner : MonoBehaviour {
             }
         }
 
-        for (int i = 0; i < specialsPosition.Length; i++)
-        {
-            int u = specialsPosition[i];
-            foreach (int v in adjacencyList[u])
-            {
-                adjacencyMatrix[v, u] = specialsValue[i];
-            }
-        }
+        //for (int i = 0; i < specialsPosition.Length; i++)
+        //{
+        //    int u = specialsPosition[i];
+        //    foreach (int v in adjacencyList[u])
+        //    {
+        //        adjacencyMatrix[v, u] = specialsValue[i];
+        //    }
+        //}
 
         //for (int i = 0; i < nRow * nColumn; i++)
         //{
@@ -526,25 +554,53 @@ public class MapSpawner : MonoBehaviour {
     }
 
     // Use this for initialization
-	void Start () {
+    void Start()
+    {
+        //GenerateMap(10, 10);
 
-        LoadMap("map", 3);
-
-        //GenerateMap(12, 12);
+        LoadMap("map", LevelManager.level);
 
         BuildGraph();
 
-        FindShortestPath();
+        //FindShortestPath();
 
-        playerPower = distance[target];
+        //playerPower = distance[target];
         playerPowerText.text = playerPower.ToString();
-        
-        ShowMap();
+        gameResultText.gameObject.SetActive(false);
+        restartButton.gameObject.SetActive(false);
+        menuButton.gameObject.SetActive(false);
 
+        ShowMap();
+    }
+
+    void RestartOnClick()
+    {
+        Application.LoadLevel("PlayScene");
+    }
+
+    void MenuOnClick()
+    {
+        Application.LoadLevel("Menu");
     }
 
     // Update is called once per frame
-    void Update () {
-        
+    void Update()
+    {
+        if (playerPower <= 0)
+        {
+            //Debug.Log(player);
+            player.GetComponent<PlayerController>().SetGamePause(true);            
+            gameResultText.gameObject.SetActive(true);
+            restartButton.gameObject.SetActive(true);
+            menuButton.gameObject.SetActive(true);
+
+            if (player.GetComponent<PlayerController>().GetPosition() == target)
+                gameResultText.text = "YOU WIN";
+            else
+                gameResultText.text = "GAME OVER";             
+        }
+
+        restartButton.onClick.AddListener(RestartOnClick);
+        menuButton.onClick.AddListener(MenuOnClick);
     }
 }

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-public class PlayerController : MonoBehaviour {
+public class PlayerController : MonoBehaviour
+{
 
     private GameObject mapSpawner;
     private MapSpawner mapSpawnerScript;
@@ -16,9 +16,20 @@ public class PlayerController : MonoBehaviour {
 
     private bool gamePause;
 
+    public int GetPosition()
+    {
+        return position;
+    }
+
+    public void SetGamePause(bool x)
+    {
+        gamePause = x;
+    }
+
     // Use this for initialization
-    void Start () {
-        
+    void Start()
+    {
+
         mapSpawner = GameObject.Find("MapSpawner");
         mapSpawnerScript = mapSpawner.GetComponent<MapSpawner>();
 
@@ -35,8 +46,8 @@ public class PlayerController : MonoBehaviour {
         exit = mapSpawnerScript.GetTarget();
 
         gamePause = false;
-	}
-	
+    }
+
     void UpdatePosition()
     {
         gameObject.transform.position = mapSpawner.transform.position
@@ -44,7 +55,8 @@ public class PlayerController : MonoBehaviour {
     }
 
     // Update is called once per frame
-    void Update () {
+    void Update()
+    {
         if (!gamePause)
         {
             if (Input.GetKeyDown(KeyCode.UpArrow)
@@ -85,18 +97,7 @@ public class PlayerController : MonoBehaviour {
                 mapSpawnerScript.DecreasePower(adjacencyMatrix[position, right]);
                 position = right;
                 UpdatePosition();
-            }
-
-            if (mapSpawnerScript.GetPlayerPower() <= 0)
-            {
-                gamePause = true;
-
-                if (position == exit)
-                    Debug.Log("YOU WIN");
-                else
-                    Debug.Log("GAME OVER");
-            }
+            }            
         }
-
     }
 }

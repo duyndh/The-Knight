@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 1874946538930212}
+  m_IsPrefabParent: 1
+--- !u!1 &1874946538930212
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4235905144882256}
+  - component: {fileID: 114166931900515138}
+  m_Layer: 0
+  m_Name: MapSpawner
+  m_TagString: MapSpawner
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4235905144882256
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1874946538930212}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114166931900515138
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1874946538930212}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1ed89ee990157b41bc3f62fb00ca8dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerPrefabs: {fileID: 1853154529200852, guid: 3cd6ce7465df81b4faf354fdec728884,
+    type: 2}
+  exitDoorPrefabs: {fileID: 1917399702063104, guid: 401a0d8f6dba32d46a6c012637c0bfc2,
+    type: 2}
+  tilePrefabs:
+  - {fileID: 0}
+  - {fileID: 1754011547997166, guid: 8aeacde9d8b2e044e84e00257a0eabc0, type: 2}
+  - {fileID: 1952635279986530, guid: 9f9ee5d1f92dd0d46b62dc05837c5245, type: 2}
+  - {fileID: 1091883764537556, guid: 81d1c4438d6ccc04890d56ef37b025cf, type: 2}
+  - {fileID: 1924367775437166, guid: 5b983873bc7d10a4cb9f41e10cf06fdb, type: 2}
+  - {fileID: 1066820164832872, guid: df714a2827105c047bf8831a8956070b, type: 2}
+  - {fileID: 1987470952292422, guid: 3876f07ba796bb247bf914e3bdb6e7b4, type: 2}
+  - {fileID: 1340579458955486, guid: 3ccf03f274b5c46499841196b16e1f85, type: 2}
+  - {fileID: 1953303242103234, guid: 084932773ed4987458f75248c513c727, type: 2}
+  - {fileID: 1400414986018384, guid: 071ef29d1ca99104c976d6b10a8690c7, type: 2}
+  - {fileID: 1120793825354086, guid: f76e7a3c3e2891749a7cf9737a6b4a79, type: 2}
+  - {fileID: 1536702033042664, guid: 6098b440e1770f64dafe4a0bfbbe9162, type: 2}
+  - {fileID: 1572478846463612, guid: 42f70f19e996c314380a2a6304c18e16, type: 2}
+  - {fileID: 1292398559612808, guid: 0b8f9df2d0b34754bb878ec017a418bf, type: 2}
+  - {fileID: 1687691306869874, guid: c043bda40e8df274dbf6bf0a6f9ba637, type: 2}
+  - {fileID: 1400055402244992, guid: 5b959814b1bbdea4594cfd4ab57e4ec0, type: 2}
+  wall_U: {fileID: 1340774633637044, guid: d8ff4dcf1193f8b419d54c72e87aae2e, type: 2}
+  wall_D: {fileID: 1316696775390400, guid: cabd23eca34b4ba4b925cccc6d1729cb, type: 2}
+  wall_L: {fileID: 1854844438782900, guid: b3ee0882ede54174a9c9307e71fd70e7, type: 2}
+  wall_R: {fileID: 1419641189377214, guid: cab28ef14794534488c62d62108b42c8, type: 2}
+  wall_UR: {fileID: 1804055514995406, guid: 0271765853dfcfa46a14d0f0f6f874ca, type: 2}
+  wall_DR: {fileID: 1119731177503402, guid: 5c626f141573d3a46ab111b519cf2a7c, type: 2}
+  wall_DL: {fileID: 1590654798807084, guid: f1dea7ed3dd78044e9b3619fa1008b7f, type: 2}
+  wall_UL: {fileID: 1975599594144654, guid: cdd8a87ec15aa454c8b32e38027b6160, type: 2}
