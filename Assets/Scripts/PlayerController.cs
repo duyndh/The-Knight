@@ -97,7 +97,7 @@ public class PlayerController : MonoBehaviour
                 mapSpawnerScript.DecreasePower(adjacencyMatrix[position, right]);
                 position = right;
                 UpdatePosition();
-            }            
+            }
         }
     }
 }

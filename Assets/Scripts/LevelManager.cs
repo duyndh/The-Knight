@@ -3,20 +3,22 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class LevelManager : MonoBehaviour {
+public class LevelManager : MonoBehaviour
+{
 
     public Button backButton;
 
     public Button[] levels;
 
-    public static int level = 0;
+    public static int levelsLength = 0;
+    public static int level = 0;    
 
+    // Use this for initialization
+    void Start()
+    {
+        levelsLength = levels.Length;
+    }
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
     void Load1()
     {
         level = 1;
@@ -67,10 +69,11 @@ public class LevelManager : MonoBehaviour {
         level = 10;
         Application.LoadLevel("PlayScene");
     }
-    
+
 
     // Update is called once per frame
-    void Update () {
+    void Update()
+    {
         levels[0].onClick.AddListener(() => Load1());
         levels[1].onClick.AddListener(() => Load2());
         levels[2].onClick.AddListener(() => Load3());

@@ -14,6 +14,7 @@ public class MapSpawner : MonoBehaviour
     public Text gameResultText;
     public Button restartButton;
     public Button menuButton;
+    public Button nextLevelButton;
 
     public GameObject[] tilePrefabs;
 
@@ -30,6 +31,8 @@ public class MapSpawner : MonoBehaviour
 
     private int nRow;
     private int nColumn;
+
+    private bool isWait;
 
     private GameObject player;
 
@@ -301,7 +304,7 @@ public class MapSpawner : MonoBehaviour
         nColumn = int.Parse(s[1]);
 
         playerPower = int.Parse(s[2]);
-        
+
         nodes = new int[(nRow + 2) * (nColumn + 2)];
 
         source = ToIndex0(int.Parse(s[3]));
@@ -562,6 +565,8 @@ public class MapSpawner : MonoBehaviour
 
         BuildGraph();
 
+        isWait = false;
+
         //FindShortestPath();
 
         //playerPower = distance[target];
@@ -569,18 +574,17 @@ public class MapSpawner : MonoBehaviour
         gameResultText.gameObject.SetActive(false);
         restartButton.gameObject.SetActive(false);
         menuButton.gameObject.SetActive(false);
+        nextLevelButton.gameObject.SetActive(false);
 
         ShowMap();
     }
 
-    void RestartOnClick()
+    void NextLevel()
     {
+        isWait = true;
+        LevelManager.level++;
+        Debug.Log(LevelManager.level);
         Application.LoadLevel("PlayScene");
-    }
-
-    void MenuOnClick()
-    {
-        Application.LoadLevel("Menu");
     }
 
     // Update is called once per frame
@@ -589,18 +593,25 @@ public class MapSpawner : MonoBehaviour
         if (playerPower <= 0)
         {
             //Debug.Log(player);
-            player.GetComponent<PlayerController>().SetGamePause(true);            
+            player.GetComponent<PlayerController>().SetGamePause(true);
             gameResultText.gameObject.SetActive(true);
             restartButton.gameObject.SetActive(true);
             menuButton.gameObject.SetActive(true);
 
+            //if (LevelManager.level < LevelManager.levelsLength)
+                nextLevelButton.gameObject.SetActive(true);
+
             if (player.GetComponent<PlayerController>().GetPosition() == target)
                 gameResultText.text = "YOU WIN";
             else
-                gameResultText.text = "GAME OVER";             
+                gameResultText.text = "GAME OVER";
         }
 
-        restartButton.onClick.AddListener(RestartOnClick);
-        menuButton.onClick.AddListener(MenuOnClick);
+        if (!isWait)
+        {
+            nextLevelButton.onClick.AddListener(NextLevel);
+            restartButton.onClick.AddListener(() => Application.LoadLevel("PlayScene"));
+            menuButton.onClick.AddListener(() => Application.LoadLevel("Menu"));
+        }
     }
 }
