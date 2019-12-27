@@ -1,20 +1,22 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-
     private GameObject mapSpawner;
     private MapSpawner mapSpawnerScript;
     private float spacing;
     private int[] nodes;
 
     private int[,] adjacencyMatrix;
-
     private int position, exit;
 
     private bool gamePause;
+    private DateTime startTime;
+    private DateTime endTime;
 
     public int GetPosition()
     {
@@ -29,7 +31,6 @@ public class PlayerController : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-
         mapSpawner = GameObject.Find("MapSpawner");
         mapSpawnerScript = mapSpawner.GetComponent<MapSpawner>();
 
@@ -46,12 +47,14 @@ public class PlayerController : MonoBehaviour
         exit = mapSpawnerScript.GetTarget();
 
         gamePause = false;
+
+        startTime = DateTime.Now;
     }
 
     void UpdatePosition()
     {
         gameObject.transform.position = mapSpawner.transform.position
-            + spacing * mapSpawnerScript.Coordinate(mapSpawnerScript.ToRow(mapSpawnerScript.ToIndex(position)), mapSpawnerScript.ToColumn(mapSpawnerScript.ToIndex(position)), Vector3.back);
+            + spacing * mapSpawnerScript.Coordinate(mapSpawnerScript.ToRow(mapSpawnerScript.ToIndex(position)), mapSpawnerScript.ToColumn(mapSpawnerScript.ToIndex(position)), Vector3.back);        
     }
 
     // Update is called once per frame
@@ -98,6 +101,9 @@ public class PlayerController : MonoBehaviour
                 position = right;
                 UpdatePosition();
             }
+
+            var currentTime = DateTime.Now;
+            GameObject.Find("Timer").GetComponent<Text>().text = Math.Round((currentTime - startTime).TotalSeconds, 2).ToString();
         }
     }
 }
