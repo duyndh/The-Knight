@@ -11,12 +11,24 @@ public class LevelManager : MonoBehaviour
     public Button[] levels;
 
     public static int levelsLength = 0;
-    public static int level = 0;    
+    public static int level = 10;    
 
     // Use this for initialization
     void Start()
     {
         levelsLength = levels.Length;
+		levels[0].onClick.AddListener(() => Load1());
+		levels[1].onClick.AddListener(() => Load2());
+		levels[2].onClick.AddListener(() => Load3());
+		levels[3].onClick.AddListener(() => Load4());
+		levels[4].onClick.AddListener(() => Load5());
+		levels[5].onClick.AddListener(() => Load6());
+		levels[6].onClick.AddListener(() => Load7());
+		levels[7].onClick.AddListener(() => Load8());
+		levels[8].onClick.AddListener(() => Load9());
+		levels[9].onClick.AddListener(() => Load10());
+
+		backButton.onClick.AddListener(() => Application.LoadLevel("Menu"));
     }
 
     void Load1()
@@ -74,17 +86,6 @@ public class LevelManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        levels[0].onClick.AddListener(() => Load1());
-        levels[1].onClick.AddListener(() => Load2());
-        levels[2].onClick.AddListener(() => Load3());
-        levels[3].onClick.AddListener(() => Load4());
-        levels[4].onClick.AddListener(() => Load5());
-        levels[5].onClick.AddListener(() => Load6());
-        levels[6].onClick.AddListener(() => Load7());
-        levels[7].onClick.AddListener(() => Load8());
-        levels[8].onClick.AddListener(() => Load9());
-        levels[9].onClick.AddListener(() => Load10());
-
-        backButton.onClick.AddListener(() => Application.LoadLevel("Menu"));
+        
     }
 }

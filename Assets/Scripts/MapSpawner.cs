@@ -514,7 +514,6 @@ public class MapSpawner : MonoBehaviour
     void FindShortestPath()
     {
         int numberNodes = nRow * nColumn;
-
         bool[] free = new bool[numberNodes];
 
         distance = new int[numberNodes];
@@ -541,7 +540,7 @@ public class MapSpawner : MonoBehaviour
                 }
 
             // found shortest path from source to targer -> break
-            if (u == target)
+            if (u == target	)
                 break;
 
             free[u] = false;
@@ -562,21 +561,27 @@ public class MapSpawner : MonoBehaviour
         //GenerateMap(10, 10);
 
         LoadMap("map", LevelManager.level);
-
+        
         BuildGraph();
 
         isWait = false;
 
         //FindShortestPath();
-
         //playerPower = distance[target];
+
         playerPowerText.text = playerPower.ToString();
+		playerPowerText.gameObject.SetActive(true);
+
         gameResultText.gameObject.SetActive(false);
         restartButton.gameObject.SetActive(false);
         menuButton.gameObject.SetActive(false);
         nextLevelButton.gameObject.SetActive(false);
 
         ShowMap();
+
+		nextLevelButton.onClick.AddListener(NextLevel);
+		restartButton.onClick.AddListener(() => Application.LoadLevel("PlayScene"));
+		menuButton.onClick.AddListener(() => Application.LoadLevel("Menu"));
     }
 
     void NextLevel()
@@ -607,11 +612,5 @@ public class MapSpawner : MonoBehaviour
                 gameResultText.text = "GAME OVER";
         }
 
-        if (!isWait)
-        {
-            nextLevelButton.onClick.AddListener(NextLevel);
-            restartButton.onClick.AddListener(() => Application.LoadLevel("PlayScene"));
-            menuButton.onClick.AddListener(() => Application.LoadLevel("Menu"));
-        }
     }
 }

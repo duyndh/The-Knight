@@ -14,6 +14,9 @@ public class MenuManager : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+		startButton.onClick.AddListener(StartOnClick);
+		aboutButton.onClick.AddListener(AboutOnClick);
+		exitButton.onClick.AddListener(ExitOnClick);
     }
 
     void StartOnClick()
@@ -34,8 +37,6 @@ public class MenuManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        startButton.onClick.AddListener(StartOnClick);
-        aboutButton.onClick.AddListener(AboutOnClick);
-        exitButton.onClick.AddListener(ExitOnClick);
+        
     }
 }
