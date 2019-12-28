@@ -8,14 +8,14 @@ public class MenuManager : MonoBehaviour
 {
 
     public Button startButton;
-    public Button aboutButton;
+    //public Button aboutButton;
     public Button exitButton;
 
     // Use this for initialization
     void Start()
     {
 		startButton.onClick.AddListener(StartOnClick);
-		aboutButton.onClick.AddListener(AboutOnClick);
+		//aboutButton.onClick.AddListener(AboutOnClick);
 		exitButton.onClick.AddListener(ExitOnClick);
     }
 
@@ -24,10 +24,10 @@ public class MenuManager : MonoBehaviour
         Application.LoadLevel("Level");
     }
 
-    void AboutOnClick()
-    {
-        Application.LoadLevel("About");
-    }
+    //void AboutOnClick()
+    //{
+    //    Application.LoadLevel("About");
+    //}
 
     void ExitOnClick()
     {
